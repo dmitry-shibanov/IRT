@@ -35,7 +35,7 @@ const iterateFromUsers = async (email: string) => {
   });
 
   if (secretary) {
-    return { user: secretary, role: "secretary" };
+    return { user: secretary, role: "secretary", key: Secrets.secretary };
   }
 
   const student = await Student.findOne({
@@ -46,7 +46,7 @@ const iterateFromUsers = async (email: string) => {
     return null;
   }
 
-  return { user: student, role: "student" };
+  return { user: student, role: "student", key: Secrets.student };
 };
 
 // nT15wwBXaggzoOOn databaseUser
@@ -84,7 +84,7 @@ export const postLogin: RequestHandler = async (req, res, next) => {
         email: currentUser!.email,
         userId: currentUser!.id,
       },
-      Secrets.student,
+      userObject.key,
       { expiresIn: "10h" }
     );
 

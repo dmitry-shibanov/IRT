@@ -3,11 +3,12 @@ import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import Secretary from "../db/Secretary";
-import Student from "../db/Student";
+import Student, { IStudent } from "../db/Student";
 import HttpRequestError from "../models/HttpRequestError";
 import Secrets from "../keys/keys.json";
 import Subjects from "../db/Subjects";
 import Factors from "../db/Factors";
+import ISubject from "../models/Subject";
 
 export const postCreateUser: RequestHandler = async (req, res, next) => {
   const firstName = req.body.firstName;
@@ -29,6 +30,9 @@ export const postCreateUser: RequestHandler = async (req, res, next) => {
       throw err;
     }
 
+    //temp logic remove it.
+    const user = await Student.findOne();
+
     const newStudent = new Student({
       email: email,
       firstName: firstName,
@@ -36,6 +40,8 @@ export const postCreateUser: RequestHandler = async (req, res, next) => {
       password: password,
       course: +course,
       group: group,
+      subjects: user?.subjects,
+      factors: user?.factors,
     });
     console.log(`created user ${newStudent}`);
     const result = await newStudent.save();
@@ -55,7 +61,12 @@ export const postCreateUser: RequestHandler = async (req, res, next) => {
   }
 };
 
-const getInitialTable: RequestHandler = async (req, res, next) => {
+export const getInitialSuitableTable: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  console.log(`came to getInitialSuitableTable`);
   const subjects = await Subjects.find();
   const factors = await Factors.find();
 
@@ -63,7 +74,7 @@ const getInitialTable: RequestHandler = async (req, res, next) => {
     throw new HttpRequestError("Data was not found", 422);
   }
 
-  const fullArray = [...subjects, ...factors];
+  const fullArray = [...subjects]; // , ...factors
 
   return res.status(200).json({
     subjects: fullArray,
@@ -71,24 +82,40 @@ const getInitialTable: RequestHandler = async (req, res, next) => {
 };
 
 export const postSubjectsToSearch: RequestHandler = async (req, res, next) => {
-  const subjects = req.body.subjects;
+  const subjectsFactors = req.body.subjects;
+
+  console.log(`subjectsFactors is ${subjectsFactors}`);
   try {
     const maxAge = 50;
     const multyPlyer = 0.2;
-    const students = await Student.find({
-      "subjects.id": {
-        $in: subjects,
-      },
-    });
+    // const students = await Student.find({
+    //   "subjects.id": {
+    //     $in: subjects,
+    //   },
+    // });
+    const students = await Student.find();
 
     if (!students || students.length === 0) {
       throw new HttpRequestError("No students were found", 422);
     }
 
-    const studentResults: Array<{ id: string; result: Number }> = [];
-    const result = 1;
+    let data: {student: IStudent, result: number}[] = [];
 
-    return res.status(200).json({ result: result });
+    students.forEach((item, index) => {
+        data.push({student: item, result: 0});
+        item.subjects.forEach(item => {
+            if(subjectsFactors.includes(item.id.toString())) {
+                data[index].result+= (+item.mark)*multyPlyer;
+            }
+        });
+
+        data[index].result = Math.sqrt(data[index].result);
+    });
+
+    data.sort((item1, item2) => {
+        return item1.result > item2.result ? -1 : 1;
+    });
+    return res.status(200).json({ result: data });
   } catch (_err) {
     next(_err);
   }

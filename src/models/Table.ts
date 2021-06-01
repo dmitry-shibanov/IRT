@@ -1,5 +1,8 @@
 import { Date } from "mongoose";
 
 export interface ITable {
-    date: string,
+}
+
+export interface TableBaseDocument extends ITable, Document {
+    
 }
