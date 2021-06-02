@@ -3,7 +3,6 @@ import { Server } from "http";
 import initServer from "./initSockets";
 let io: socketIO.Server;
 
-
 const initServer = (httpServer: Server) => {
   io = new socketIO.Server(httpServer);
   return io;

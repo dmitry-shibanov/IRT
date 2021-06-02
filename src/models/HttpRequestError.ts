@@ -1,12 +1,12 @@
 class HttpRequestError extends Error {
-    public _statusCode: string | number;
-    constructor(message: string, statusCode: string | number) {
+    private _statusCode: number;
+    constructor(message: string, statusCode: number) {
         super(message);
         this._statusCode = statusCode;
     }
 
-    public get statusCode() {
-        return this._statusCode
+    public statusCode = () => {
+        return this._statusCode;
     }
 }
 

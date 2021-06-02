@@ -8,7 +8,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-16.04, windows-latest, macOS-latest]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -20,9 +20,9 @@ jobs:
         node-version: '12.x'
     - name: Install dependrencies
       run: npm ci
-    - name: Prettier Format Check
-      run: npm run format-check
-    - name: ESLint Check
-      run: npm run lint
-    - name: Build
-      run: npm run build
+    # - name: Prettier Format Check
+    #   run: npm run format-check
+    # - name: ESLint Check
+    #   run: npm run lint
+    # - name: Build
+    #   run: npm run build

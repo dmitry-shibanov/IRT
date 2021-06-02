@@ -26,7 +26,7 @@
   },
   "scripts": {
     "tsc": "tsc",
-    "start:dev": "nodemon dist/app.js",
+    "start:dev": "nodemon --config nodemon.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

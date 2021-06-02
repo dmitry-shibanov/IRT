@@ -1,5 +1,5 @@
 import { Server } from "http";
-import SocketIO from 'socket.io';
+import SocketIO from "socket.io";
 
 type initServerType = {
   init: (httpServer: Server) => SocketIO.Server;

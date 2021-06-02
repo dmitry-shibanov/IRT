@@ -1,12 +1,11 @@
 ## Common
 There is a simple server to get infromation abotu student and their work. It will calculate the most preferable  student
-for specific job.
+for the specific job.
 ### Prereuiremints:
  - `npm install -g ts-node`
 ### Start server
 1. `npm install`
-2. `npm run tsc`
-3. `npm run start:dev`
+2. `npm run start:dev`
 
 #### Start server with docker
 1. Build image: `docker build -t docker_id/server_name:latest -f DockerFile.dev`

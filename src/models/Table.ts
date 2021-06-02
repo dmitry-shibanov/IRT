@@ -1,8 +1,3 @@
-import { Date } from "mongoose";
+export interface ITable {}
 
-export interface ITable {
-}
-
-export interface TableBaseDocument extends ITable, Document {
-    
-}
+export interface TableBaseDocument extends ITable, Document {}

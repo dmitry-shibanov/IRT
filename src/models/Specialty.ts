@@ -1,11 +1,8 @@
-import { Document, Model } from "mongoose"
+import { Document, Model } from "mongoose";
 
 export interface Speciality {
-  group: string,
-  faculty: string
+  group: string;
+  faculty: string;
 }
 
-
-export interface SpecialityBaseDocument extends Speciality, Document {
-
-}
+export interface SpecialityBaseDocument extends Speciality, Document {}

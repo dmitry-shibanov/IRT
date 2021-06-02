@@ -53,30 +53,32 @@ const iterateFromUsers = async (email: string) => {
 export const postLogin: RequestHandler = async (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  console.log("login came to request handler");
   const result = validationResult(req);
-  console.log(`login came validation result ${result}`);
   const error = result.array({ onlyFirstError: true })[0];
+
+  // console.log('came to login');
+  
   try {
     if (!result.isEmpty()) {
-      result
-        .array({ onlyFirstError: true })
-        .forEach((item) => console.log(item));
-
-      throw new HttpRequestError(error.msg, 401);
+      throw new HttpRequestError(error.msg, 400);
     }
 
     const userObject = await iterateFromUsers(email);
 
     if (!userObject) {
-      throw new HttpRequestError("Пользователь не найден", 401);
+      throw new HttpRequestError("Пользователь не найден", 404);
     }
 
     const currentUser = userObject.user;
     const role = userObject.role;
 
-    if (!bcrypt.compare(password, currentUser?.password)) {
-      throw new HttpRequestError("Пароли не совпадают", 401);
+    const passwordCompareResult = await bcrypt.compare(
+      password,
+      currentUser?.password
+    );
+
+    if (!passwordCompareResult) {
+      throw new HttpRequestError("Пароли не совпадают", 404);
     }
 
     const token = jwt.sign(
@@ -98,11 +100,11 @@ export const postLogin: RequestHandler = async (req, res, next) => {
 
 export const postForgortPassword: RequestHandler = async (req, res, next) => {
   const email = req.body.email;
-
   const userId = res.locals.jwtPayLoad.userId;
+
   try {
     if (userId) {
-      throw new HttpRequestError("Вы уже авторизованы", 422);
+      throw new HttpRequestError("Вы уже авторизованы", 403);
     }
 
     const user = await Student.findOne({
@@ -112,7 +114,7 @@ export const postForgortPassword: RequestHandler = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(403).json({
+      return res.status(404).json({
         message: "Пользователь с данным email не существует",
         error: true,
       });

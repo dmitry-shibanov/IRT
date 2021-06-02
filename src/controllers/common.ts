@@ -1,8 +1,8 @@
 import { RequestHandler } from "express";
 import Factors from "../db/Factors";
-import Student, { IUserModel } from "../db/Student";
+import Student from "../db/Student";
 import Subjects from "../db/Subjects";
-import Table, { TableDocument } from "../db/Table";
+import Table from "../db/Table";
 import HttpRequestError from "../models/HttpRequestError";
 
 export const getSubjectList: RequestHandler = async (req, res, next) => {
@@ -20,47 +20,47 @@ export const getSubjectList: RequestHandler = async (req, res, next) => {
 };
 
 export const getFactorsList: RequestHandler = async (req, res, next) => {
-    try {
-        const factors = await Factors.find();
-        if (!factors || factors.length === 0) {
-            throw new HttpRequestError("No factors found", 404);
-        }
-
-        return res.status(200).json({factors: factors});
-    } catch(_err) {
-        next(_err);
+  try {
+    const factors = await Factors.find();
+    if (!factors || factors.length === 0) {
+      throw new HttpRequestError("No factors found", 404);
     }
-}
+
+    return res.status(200).json({ factors: factors });
+  } catch (_err) {
+    next(_err);
+  }
+};
 
 export const getFactorById: RequestHandler = async (req, res, next) => {
-    const id = req.params.id;
-    try {
-        const factor = await Factors.findById(id);
+  const id = req.params.id;
+  try {
+    const factor = await Factors.findById(id);
 
-        if(!factor) {
-            throw new HttpRequestError("Factor was not found", 404);
-        }
-
-        return res.status(200).json({factor: factor});
-    } catch(_err) {
-        next(_err);
+    if (!factor) {
+      throw new HttpRequestError("Factor was not found", 404);
     }
-}
+
+    return res.status(200).json({ factor: factor });
+  } catch (_err) {
+    next(_err);
+  }
+};
 
 export const getSubjectById: RequestHandler = async (req, res, next) => {
-    const id = req.params.id;
-    try {
-        const subject = await Subjects.findById(id);
+  const id = req.params.id;
+  try {
+    const subject = await Subjects.findById(id);
 
-        if(!subject) {
-            throw new HttpRequestError("Subject was not found", 404);
-        }
-
-        return res.status(200).json({subject: subject});
-    } catch(_err) {
-        next(_err);
+    if (!subject) {
+      throw new HttpRequestError("Subject was not found", 404);
     }
-}
+
+    return res.status(200).json({ subject: subject });
+  } catch (_err) {
+    next(_err);
+  }
+};
 
 export const getTablesByUserId: RequestHandler = async (req, res, next) => {
   const userId = req.params.userId;

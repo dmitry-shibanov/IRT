@@ -47,15 +47,3 @@ export const getTableById: RequestHandler = async (req, res, next) => {
     next(_err);
   }
 };
-
-export const getChosenProfessions: RequestHandler = async (
-  req,
-  res,
-  next
-) => {};
-
-export const postChooseProfessions: RequestHandler = async (
-  req,
-  res,
-  next
-) => {};

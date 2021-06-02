@@ -5,9 +5,9 @@ import { json, urlencoded } from "body-parser";
 import secretaryRoutes from "./routes/secretary";
 import db from "./keys/db.json";
 import studentRoutes from "./routes/student";
-import auth from './routes/auth';
+import auth from "./routes/auth";
 import HttpRequestError from "./models/HttpRequestError";
-import initServer from './sockets';
+import initServer from "./sockets";
 const app = express();
 
 app.use(json());
@@ -32,21 +32,18 @@ app.use("/secretary", secretaryRoutes);
 app.use("/student", studentRoutes);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-  return res.status(404).json({ page: "page not found" });
+  return res.status(404).json({ message: "page not found" });
 });
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  let statusCode: string | number = 500;
-  console.log(`error is ${err.message}`);
-  if (err instanceof HttpRequestError) {
-    console.log(`HttpRequestError is ${err._statusCode}`);
-    console.log(`error is ${err.message}`);
+  let statusCode = 500;
+  const errHttpRequest = err as HttpRequestError;
 
-    statusCode = err._statusCode;
+  if (errHttpRequest["statusCode"]) {
+    statusCode = errHttpRequest.statusCode();
   }
 
-  console.log(`statusCode is ${statusCode}`);
-  return res.status(+statusCode).json({ message: err.message });
+  return res.status(statusCode).json({ message: err.message });
 });
 
 mongoose
