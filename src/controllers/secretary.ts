@@ -4,6 +4,7 @@ import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import Secretary from "../db/Secretary";
 import Student, { IStudent } from "../db/Student";
+import Professions from '../db/Professions';
 import HttpRequestError from "../models/HttpRequestError";
 import Secrets from "../keys/keys.json";
 import Subjects from "../db/Subjects";
@@ -63,6 +64,15 @@ export const getInitialSuitableTable: RequestHandler = async (
     const subjects = await Subjects.find();
     const factors = await Factors.find();
 
+    const professionArray = await Professions.find();
+    const professionArrayPopulated = await Promise.all(professionArray.map(async (item)=> {
+        const populatedObject =  await item.populate('subjects').execPopulate();
+        // console.log(`populatedObject is ${populatedObject}`);
+        console.log(`populatedObject._doc is ${populatedObject._doc.name}`);
+
+        return populatedObject._doc;
+    }));
+console.log(professionArrayPopulated);
     if (
       !subjects ||
       !factors ||
@@ -76,6 +86,7 @@ export const getInitialSuitableTable: RequestHandler = async (
 
     return res.status(200).json({
       subjects: fullArray,
+      variants: professionArrayPopulated
     });
   } catch (_err) {
     next(_err);
@@ -113,7 +124,7 @@ export const postSubjectsToSearch: RequestHandler = async (req, res, next) => {
     });
 
     data.sort((item1, item2) => {
-      return item1.result > item2.result ? -1 : 1;
+      return item1.result > item2.result ? 1 : -1;
     });
     return res.status(200).json({ result: data });
   } catch (_err) {

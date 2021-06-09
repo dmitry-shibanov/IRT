@@ -56,15 +56,27 @@ export const postLogin: RequestHandler = async (req, res, next) => {
   const result = validationResult(req);
   const error = result.array({ onlyFirstError: true })[0];
 
-  // console.log('came to login');
+  console.log('came to login');
+  console.log(email);
+  console.log(password);
+
   
   try {
     if (!result.isEmpty()) {
+      console.log('failed validation');
+      console.log(error.msg);
+
+      result.array().forEach(item =>{
+        console.log(item.msg);
+        
+      })
+      
       throw new HttpRequestError(error.msg, 400);
     }
 
     const userObject = await iterateFromUsers(email);
-
+    console.log(`userObject is ${userObject?.user.password}`);
+    
     if (!userObject) {
       throw new HttpRequestError("Пользователь не найден", 404);
     }
@@ -74,8 +86,11 @@ export const postLogin: RequestHandler = async (req, res, next) => {
 
     const passwordCompareResult = await bcrypt.compare(
       password,
-      currentUser?.password
+      userObject?.user.password
     );
+
+    console.log(`compare result is ${passwordCompareResult}`);
+    
 
     if (!passwordCompareResult) {
       throw new HttpRequestError("Пароли не совпадают", 404);
