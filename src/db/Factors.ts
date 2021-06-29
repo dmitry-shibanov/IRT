@@ -1,13 +1,11 @@
 import { Schema, model, Document, Model } from "mongoose";
-import  IFactor from '../models/Factors'
+import IFactor from "../models/Factors";
 
 interface IFactorDocument extends IFactor, Document {
-
+  _doc?: any;
 }
 
-interface IFactorModel extends Model<IFactorDocument> {
-
-}
+interface IFactorModel extends Model<IFactorDocument> {}
 
 const Factors = new Schema<IFactorDocument, IFactorModel>({
   name: {

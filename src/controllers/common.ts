@@ -21,7 +21,7 @@ export const getSubjectList: RequestHandler = async (req, res, next) => {
 
 export const getFactorsList: RequestHandler = async (req, res, next) => {
   try {
-    const factors = await Factors.find();
+    const factors = (await Factors.find())?.map((item) => item._doc);
     if (!factors || factors.length === 0) {
       throw new HttpRequestError("No factors found", 404);
     }

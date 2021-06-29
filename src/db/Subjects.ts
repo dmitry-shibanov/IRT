@@ -1,13 +1,11 @@
 import { Schema, model, Document, Model } from "mongoose";
-import  ISubject from '../models/Subject'
+import ISubject from "../models/Subject";
 
 interface ISubjectDocument extends ISubject, Document {
-
+  _doc?: any;
 }
 
-interface ISubjectModel extends Model<ISubjectDocument> {
-
-}
+interface ISubjectModel extends Model<ISubjectDocument> {}
 
 const Subjects = new Schema<ISubjectDocument, ISubjectModel>({
   name: {
