@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
 jobs:
   build:
     strategy:
@@ -24,5 +26,5 @@ jobs:
     #   run: npm run format-check
     # - name: ESLint Check
     #   run: npm run lint
-    # - name: Build
-    #   run: npm run build
+    - name: Build
+      run: npm run build

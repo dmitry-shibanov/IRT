@@ -56,27 +56,25 @@ export const postLogin: RequestHandler = async (req, res, next) => {
   const result = validationResult(req);
   const error = result.array({ onlyFirstError: true })[0];
 
-  console.log('came to login');
+  console.log("came to login");
   console.log(email);
   console.log(password);
 
-  
   try {
     if (!result.isEmpty()) {
-      console.log('failed validation');
+      console.log("failed validation");
       console.log(error.msg);
 
-      result.array().forEach(item =>{
+      result.array().forEach((item) => {
         console.log(item.msg);
-        
-      })
-      
+      });
+
       throw new HttpRequestError(error.msg, 400);
     }
 
     const userObject = await iterateFromUsers(email);
     console.log(`userObject is ${userObject?.user.password}`);
-    
+
     if (!userObject) {
       throw new HttpRequestError("Пользователь не найден", 404);
     }
@@ -90,7 +88,6 @@ export const postLogin: RequestHandler = async (req, res, next) => {
     );
 
     console.log(`compare result is ${passwordCompareResult}`);
-    
 
     if (!passwordCompareResult) {
       throw new HttpRequestError("Пароли не совпадают", 404);
@@ -137,10 +134,14 @@ export const postForgortPassword: RequestHandler = async (req, res, next) => {
     const token = generateRandomToken();
     const date = new Date(Date.now() + 3600000);
 
-    await user.update({
-      resetToken: token,
-      resetDate: date,
-    });
+    await user.update([
+      {
+        $set: {
+          resetToken: token,
+          resetDate: date,
+        },
+      },
+    ]).exec();
 
     transporter.sendMail({
       to: email,
@@ -152,5 +153,7 @@ export const postForgortPassword: RequestHandler = async (req, res, next) => {
             `,
     });
     return res.status(200).json("message was sent");
-  } catch (_err) {}
+  } catch (_err) {
+    next(_err);
+  }
 };

@@ -1,14 +1,12 @@
 import { Schema, model, Model } from "mongoose";
-import { UsareBaseDocument } from '../models/User';
-import { IStudent } from './Student';
+import { UsareBaseDocument } from "../models/User";
+import { IStudent } from "./Student";
 
 interface ISecretaryDocument extends UsareBaseDocument {
-    // addTable(): IStudent;
+  // addTable(): IStudent;
 }
 
-interface SecretaryModel extends Model<ISecretaryDocument> {
-
-}
+interface SecretaryModel extends Model<ISecretaryDocument> {}
 
 const Secretary = new Schema<ISecretaryDocument, SecretaryModel>({
   firstName: {
@@ -26,8 +24,19 @@ const Secretary = new Schema<ISecretaryDocument, SecretaryModel>({
   password: {
     type: String,
     required: true,
-  }
+  },
+  resetToken: {
+    type: String,
+    required: false,
+  },
+  resetDate: {
+    type: Schema.Types.Date,
+    required: false,
+  },
 });
 
-
-export default model<ISecretaryDocument, SecretaryModel>("Secretary", Secretary, "secretary");
+export default model<ISecretaryDocument, SecretaryModel>(
+  "Secretary",
+  Secretary,
+  "secretary"
+);

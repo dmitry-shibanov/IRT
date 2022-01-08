@@ -4,7 +4,7 @@ import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import Secretary from "../db/Secretary";
 import Student, { IStudent } from "../db/Student";
-import Professions from '../db/Professions';
+import Professions from "../db/Professions";
 import HttpRequestError from "../models/HttpRequestError";
 import Secrets from "../keys/keys.json";
 import Subjects from "../db/Subjects";
@@ -65,14 +65,16 @@ export const getInitialSuitableTable: RequestHandler = async (
     const factors = await Factors.find();
 
     const professionArray = await Professions.find();
-    const professionArrayPopulated = await Promise.all(professionArray.map(async (item)=> {
-        const populatedObject =  await item.populate('subjects').execPopulate();
+    const professionArrayPopulated = await Promise.all(
+      professionArray.map(async (item) => {
+        const populatedObject = await item.populate("subjects").execPopulate();
         // console.log(`populatedObject is ${populatedObject}`);
         console.log(`populatedObject._doc is ${populatedObject._doc.name}`);
 
         return populatedObject._doc;
-    }));
-console.log(professionArrayPopulated);
+      })
+    );
+    console.log(professionArrayPopulated);
     if (
       !subjects ||
       !factors ||
@@ -86,7 +88,7 @@ console.log(professionArrayPopulated);
 
     return res.status(200).json({
       subjects: fullArray,
-      variants: professionArrayPopulated
+      variants: professionArrayPopulated,
     });
   } catch (_err) {
     next(_err);
@@ -177,6 +179,90 @@ export const getStudentById: RequestHandler = async (req, res, next) => {
 
     return res.status(200).json({
       ...populatedStudent._doc,
+    });
+  } catch (_err) {
+    next(_err);
+  }
+};
+
+// Update
+
+export const updateFactorById: RequestHandler = async (req, res, next) => {
+  const id = req.params.id;
+  const name = req.body.name;
+
+  try {
+    const factor = await Factors.findById(id);
+
+    if (!factor) {
+      throw new HttpRequestError("Factor was not found", 404);
+    }
+
+    await factor
+      .update({
+        name: name,
+      })
+      .exec();
+
+    return res.status(204).json({
+      message: "Данные были успешно обновлены",
+    });
+  } catch (_err) {
+    next(_err);
+  }
+};
+
+export const updateSubjectById: RequestHandler = async (req, res, next) => {
+  const id = req.params.id;
+  const name = req.body.name;
+
+  try {
+    const subject = await Subjects.findByIdAndUpdate(id, {
+      name: name,
+    }).exec();
+
+    if (!subject) {
+      throw new HttpRequestError("Document is not updated", 404);
+    }
+
+    return res.status(204).json({
+      message: "Предмет был обновлен",
+    });
+  } catch (_err) {
+    next(_err);
+  }
+};
+
+export const updateManySubjects: RequestHandler = async (req, res, next) => {
+  const objMap = req.body.map;
+  const keys = Array.from(objMap.keys());
+
+  try {
+    const subjects = await Subjects.find({
+      $where: function () {
+        return keys.includes(this._id);
+      },
+    });
+
+    if (subjects.length === 0) {
+      throw new HttpRequestError("No subjects were found", 404);
+    }
+
+    keys.forEach(async (key: any) => {
+      const subject = subjects.find((subject) => subject.id === key);
+      const result = await subject
+        ?.update({
+          name: objMap[key].name,
+        })
+        .exec();
+
+      if (!result) {
+        throw new HttpRequestError("Не смогли обновить объект", 500);
+      }
+    });
+
+    return res.status(204).json({
+      message: "Предмет был обновлен",
     });
   } catch (_err) {
     next(_err);

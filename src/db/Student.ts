@@ -31,6 +31,14 @@ const Student = new Schema<IStudent, IUserModel>({
     type: String,
     required: true,
   },
+  resetToken: {
+    type: String,
+    required: false
+  },
+  resetDate: {
+    type: Schema.Types.Date,
+    required: false
+  },
   subjects:  [
       {
         id: {

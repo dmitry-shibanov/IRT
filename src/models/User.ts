@@ -5,6 +5,8 @@ export interface User {
   lastName: string;
   email: string;
   password: string;
+  resetToken?: string;
+  resetDate?: string
 }
 
 export interface UsareBaseDocument extends User, Document {}

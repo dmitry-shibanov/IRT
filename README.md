@@ -1,19 +1,12 @@
 ## Common
 There is a simple server to get infromation abotu student and their work. It will calculate the most preferable  student
 for the specific job.
+
 ### Prereuiremints:
  - `npm install -g ts-node`
-### Start server
-1. `npm install`
-2. `npm run start:dev`
 
-#### Start server with docker
-1. Build image: `docker build -t docker_id/server_name:latest -f DockerFile.dev`
-2. Run: `docker run -p 3700:3700 docker_id/server_name`
-
- - To stop container:  
-    1. `containerId=$(docker container ls -a --filter ancestor=docker_id/server_name)`
-    2. `docker stop $containerId`
+1. [To run dev server](docs/Dev-server.md)
+2. [Work with docker](docs/Work-with-docker.md)
 
 ### Build server
 You should run this commad to build the server: `npm run build`
