@@ -1,11 +1,8 @@
 import { RequestHandler } from "express";
-import { validationResult } from "express-validator";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import Student from "../db/Student";
 import HttpRequestError from "../models/HttpRequestError";
-import Secrets from "../keys/keys.json";
 import Table from "../db/Table";
+import { Types } from "mongoose";
 
 export const getTablesByUserId: RequestHandler = async (req, res, next) => {
   const userId = res.locals.jwtPayLoad.userId;
@@ -15,33 +12,29 @@ export const getTablesByUserId: RequestHandler = async (req, res, next) => {
       throw new HttpRequestError("The user does not exists", 404);
     }
 
-    // const populatedStudent = await student
-    //   .populate("table.items.tableId")
-    //   .execPopulate();
-
     return res.status(200).json({
-      tables: []//populatedStudent.table.items,
+      tables: [], //populatedStudent.table.items,
     });
   } catch (_err) {
     next(_err);
   }
-  // const authHeader = req.get("Authorization");
-  // const token = authHeader?.split(" ")[1];
-  // const decodedToken = jwt.decode(token!);
 };
 
 export const getTableById: RequestHandler = async (req, res, next) => {
   const tableId = req.params.tableId;
   try {
-    const table = await Table.findById(tableId);
+    const table = Types.ObjectId.isValid(tableId)
+      ? await Table.findById(tableId)
+      : null;
     if (!table) {
-      throw new HttpRequestError(
-        "The specific table does not exists anymore",
-        404
-      );
+      return res
+        .status(404)
+        .json({ message: "The specific table does not exists anymore" });
     }
 
-    const populatedTable = await table.populate("professions.items.professionId").execPopulate();
+    const populatedTable = await table.populate(
+      "professions.items.professionId"
+    );
     return res.status(200).json({ table: populatedTable });
   } catch (_err) {
     next(_err);

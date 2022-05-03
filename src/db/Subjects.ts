@@ -1,8 +1,8 @@
 import { Schema, model, Document, Model } from "mongoose";
 import ISubject from "../models/Subject";
 
-interface ISubjectDocument extends ISubject, Document {
-  _doc?: any;
+export interface ISubjectDocument extends ISubject, Document {
+
 }
 
 interface ISubjectModel extends Model<ISubjectDocument> {}

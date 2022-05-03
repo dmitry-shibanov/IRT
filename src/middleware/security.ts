@@ -1,15 +1,9 @@
-import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import HttpRequestError from "../models/HttpRequestError";
-import Secrets from "../keys/keys.json";
 
-const sessionUser = (
-  key: string,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  console.log(`key is ${key}`);
+import { verify } from "../controllers/auth/jwt-auth";
+
+const sessionUser = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.get("Authorization");
   console.log(`came to authorization ${authHeader}`);
   try {
@@ -26,20 +20,12 @@ const sessionUser = (
       throw new HttpRequestError("Токен не передан или пустой", 401);
     }
 
-    let decodedToken;
-
-    if (!key) {
-      decodedToken =
-        jwt.verify(token, Secrets.student) ??
-        jwt.verify(token, Secrets.student);
-    } else {
-      decodedToken = jwt.verify(token, key);
-    }
+    const decodedToken = verify(token);
 
     console.log(`decodedToken ${decodedToken}`);
 
     if (!decodedToken) {
-      const err = new HttpRequestError("Ошибка при создании токена", 500);
+      const err = new HttpRequestError("Ошибка при валидации токена", 500);
       throw err;
     }
 

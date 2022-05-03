@@ -1,7 +1,9 @@
 node_modules
 dist
-/src/keys/db.json
-/src/keys/keys.json
-/src/keys/email.json
 /assets/data
 /src/utils/hash-admin-password.ts
+.env
+/src/keys/email.json
+/src/keys/keys.json
+/src/keys/user-private.key
+/src/keys/user-public.key

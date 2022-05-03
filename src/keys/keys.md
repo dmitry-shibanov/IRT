@@ -8,11 +8,7 @@
 }
 ```
 
-Keys were generated with this command
-
-```bash
-node -e "let r = Math.random().toString(36).substr(2, 3) + '-' + Math.random().toString(36).substr(2, 3) + '-' + Math.random().toString(36).substr(2, 4); console.log(r);"
-```
+Keys were generated [here](http://travistidwell.com/jsencrypt/demo/)
 
 ## db json
 

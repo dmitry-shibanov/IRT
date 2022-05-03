@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction, Router } from "express";
 import { postLogin } from "../controllers/auth";
-import { check, body } from "express-validator/check";
+import { check, body } from "express-validator";
 import HttpRequestError from "../models/HttpRequestError";
 
 const router = Router();
@@ -21,9 +21,9 @@ router.post(
   [check("email").isEmail()],
   (req: Request, res: Response, next: NextFunction) => {
     const jwtPayLoad = res.locals.jwtPayLoad;
-    if(jwtPayLoad) {
-        const err = new HttpRequestError('Вы уже авторизированы', 403);
-        next(err);
+    if (jwtPayLoad) {
+      const err = new HttpRequestError("You're authorized", 403);
+      next(err);
     }
 
     next();

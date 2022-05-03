@@ -1,17 +1,20 @@
+// const logProcessErrors = require('log-process-errors');
+import "dotenv/config";
 import express, { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
-import path from "path";
 import { json, urlencoded } from "body-parser";
 import secretaryRoutes from "./routes/secretary";
-import db from "./keys/db.json";
 import studentRoutes from "./routes/student";
 import auth from "./routes/auth";
 import HttpRequestError from "./models/HttpRequestError";
-import initServer from "./sockets";
+
+// logProcessErrors({});
+
+const PORT = process.env.PORT;
+
 const app = express();
 
 app.use(json());
-// app.use("/assets/images", express.static(path.join(__dirname.replace("/dist",""), "assets/images")));
 app.use(urlencoded({ extended: false }));
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -48,13 +51,14 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 mongoose
   .connect(
-    `mongodb+srv://${db.userName}:${db.password}@clusterprofession.sfy4j.mongodb.net/${db.databaseName}?retryWrites=true&w=majority`
+    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clusterprofession.sfy4j.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
   )
-  .then((result) => {
-    console.log(result);
+  .then((_) => {
+    console.log('connected');
+    
     require("./db/Subjects");
     require("./db/Factors");
-    app.listen(3700, () => {
+    app.listen(PORT, () => {
       console.log("listening...");
     });
     // const server =  app.listen(3700, () => {

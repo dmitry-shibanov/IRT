@@ -5,12 +5,11 @@ on:
     branches:
       - main
   workflow_dispatch:
-
 jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest, windows-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -19,12 +18,6 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '12.x'
+        node-version: '16.x'
     - name: Install dependrencies
       run: npm ci
-    # - name: Prettier Format Check
-    #   run: npm run format-check
-    # - name: ESLint Check
-    #   run: npm run lint
-    - name: Build
-      run: npm run build

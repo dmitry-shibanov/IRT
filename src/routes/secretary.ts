@@ -1,6 +1,7 @@
 import { Router } from "express";
-import sessionSecretary from "../middleware/security";
-import keys from "../keys/keys.json";
+import sessionJWT from "../middleware/security";
+import { RequestHandler } from "express";
+
 import {
   getFactorById,
   getFactorsList,
@@ -14,51 +15,42 @@ import {
   getInitialSuitableTable,
   postSubjectsToSearch,
 } from "../controllers/secretary";
-import { check, body } from "express-validator/check";
+import { check, body } from "express-validator";
 
 const router = Router();
 
+const confirmRole: RequestHandler = (req, res, next) => {
+  console.log(`res.locals.payLoad is ${res.locals.jwtPayLoad}`);
+
+  if (res.locals.jwtPayLoad.role === "secretary") {
+    console.log(`res.locals.jwtPayLoad.role is ${res.locals.jwtPayLoad.role}`);
+
+    return next();
+  }
+
+  const err = new Error("You do not have anough permissions");
+  next(err);
+};
+
 // get
-router.get(
-  "/students/:studentId",
-  sessionSecretary.bind(null, keys.secretary),
-  getStudentById
-);
-router.get(
-  "/students",
-  sessionSecretary.bind(null, keys.secretary),
-  getStudents
-);
-router.get(
-  "/factors/:id",
-  sessionSecretary.bind(null, keys.secretary),
-  getFactorById
-);
-router.get(
-  "/factors",
-  sessionSecretary.bind(null, keys.secretary),
-  getFactorsList
-);
-router.get(
-  "/subjects/:id",
-  sessionSecretary.bind(null, keys.secretary),
-  getSubjectById
-);
-router.get(
-  "/subjects",
-  sessionSecretary.bind(null, keys.secretary),
-  getSubjectList
-);
+router.get("/students/:studentId", sessionJWT, confirmRole, getStudentById);
+router.get("/students", sessionJWT, confirmRole, getStudents);
+router.get("/factors/:id", sessionJWT, confirmRole, getFactorById);
+router.get("/factors", sessionJWT, confirmRole, getFactorsList);
+router.get("/subjects/:id", sessionJWT, confirmRole, getSubjectById);
+router.get("/subjects", sessionJWT, confirmRole, getSubjectList);
 router.get(
   "/findsuitablestudent",
-  sessionSecretary.bind(null, keys.secretary),
+  sessionJWT,
+  confirmRole,
   getInitialSuitableTable
 );
 
 // post
 router.post(
   "/createuser",
-  sessionSecretary.bind(null, keys.secretary),
+  sessionJWT,
+  confirmRole,
   [
     check("email").isEmail(),
     body("password").isAlphanumeric().isLength({ min: 7 }),
@@ -67,7 +59,8 @@ router.post(
 );
 router.post(
   "/searchresult",
-  sessionSecretary.bind(null, keys.secretary),
+  sessionJWT,
+  confirmRole,
   [check("factors").isArray()],
   postSubjectsToSearch
 );

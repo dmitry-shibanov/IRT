@@ -1,6 +1,4 @@
-import { Document, Model } from "mongoose";
-
-export interface User {
+export default interface IUser {
   firstName: string;
   lastName: string;
   email: string;
@@ -8,9 +6,3 @@ export interface User {
   resetToken?: string;
   resetDate?: string
 }
-
-export interface UsareBaseDocument extends User, Document {}
-
-// export interface UserModel extends Model<UserDocument> {
-//     findMyCompany(id: string): Promise<UserPopulatedDocument>
-//   }

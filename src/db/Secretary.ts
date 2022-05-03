@@ -1,8 +1,13 @@
-import { Schema, model, Model } from "mongoose";
-import { UsareBaseDocument } from "../models/User";
-import { IStudent } from "./Student";
+import { Schema, model, Model, Document } from "mongoose";
+import IUser from "../models/User";
 
-interface ISecretaryDocument extends UsareBaseDocument {
+interface ISecretary extends IUser {}
+
+interface ISecretaryBaseDocument extends ISecretary, Document {
+  fullName: String;
+}
+
+interface ISecretaryDocument extends ISecretaryBaseDocument {
   // addTable(): IStudent;
 }
 
@@ -33,6 +38,10 @@ const Secretary = new Schema<ISecretaryDocument, SecretaryModel>({
     type: Schema.Types.Date,
     required: false,
   },
+});
+
+Secretary.virtual("fullName").get(function (this: ISecretaryBaseDocument) {
+  return `${this.firstName} ${this.lastName}`;
 });
 
 export default model<ISecretaryDocument, SecretaryModel>(

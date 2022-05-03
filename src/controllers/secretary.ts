@@ -1,15 +1,9 @@
 import { RequestHandler } from "express";
-import jwt from "jsonwebtoken";
-import { validationResult } from "express-validator";
-import bcrypt from "bcrypt";
-import Secretary from "../db/Secretary";
 import Student, { IStudent } from "../db/Student";
 import Professions from "../db/Professions";
 import HttpRequestError from "../models/HttpRequestError";
-import Secrets from "../keys/keys.json";
 import Subjects from "../db/Subjects";
 import Factors from "../db/Factors";
-import ISubject from "../models/Subject";
 
 export const postCreateUser: RequestHandler = async (req, res, next) => {
   const firstName = req.body.firstName;
@@ -67,7 +61,7 @@ export const getInitialSuitableTable: RequestHandler = async (
     const professionArray = await Professions.find();
     const professionArrayPopulated = await Promise.all(
       professionArray.map(async (item) => {
-        const populatedObject = await item.populate("subjects").execPopulate();
+        const populatedObject = await item.populate("subjects");
         // console.log(`populatedObject is ${populatedObject}`);
         console.log(`populatedObject._doc is ${populatedObject._doc.name}`);
 
@@ -101,12 +95,11 @@ export const postSubjectsToSearch: RequestHandler = async (req, res, next) => {
 
   try {
     const multyPlyer = 0.2;
-    // const students = await Student.find({
-    //   "subjects.id": {
-    //     $in: subjects,
-    //   },
-    // });
-    const students = await Student.find();
+    const students = await Promise.all(
+      (
+        await Student.find()
+      ).map(async (item) => await Student.populateAll(item.id))
+    );
 
     if (!students || students.length === 0) {
       throw new HttpRequestError("Ни один студен не найден", 404);
@@ -117,7 +110,7 @@ export const postSubjectsToSearch: RequestHandler = async (req, res, next) => {
     students.forEach((item, index) => {
       data.push({ student: item, result: 0 });
       item.subjects.forEach((item) => {
-        if (subjectsFactors.includes(item.id.toString())) {
+        if (subjectsFactors.includes(item.subject.name)) {
           data[index].result += +item.mark * multyPlyer;
         }
       });
@@ -168,17 +161,23 @@ export const getStudentById: RequestHandler = async (req, res, next) => {
       email: 0,
     });
 
+    // console.log(student);
+    console.log(`student id is ${studentId}`);
+
     if (!student) {
       throw new HttpRequestError("Student not found", 422);
     }
 
-    const populatedStudent = await student
-      .populate("subjects.id")
-      .populate("factors.id")
-      .execPopulate();
+    const populatedStudent = await Student.populateAll(studentId, {
+      password: 0,
+      email: 0,
+    });
+
+    console.log(`populated Student is ${populatedStudent}`);
+    
 
     return res.status(200).json({
-      ...populatedStudent._doc,
+      ...populatedStudent,
     });
   } catch (_err) {
     next(_err);

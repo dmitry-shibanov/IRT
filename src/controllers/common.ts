@@ -21,7 +21,7 @@ export const getSubjectList: RequestHandler = async (req, res, next) => {
 
 export const getFactorsList: RequestHandler = async (req, res, next) => {
   try {
-    const factors = (await Factors.find())?.map((item) => item._doc);
+    const factors = (await Factors.find())?.map((item) => item);
     if (!factors || factors.length === 0) {
       throw new HttpRequestError("No factors found", 404);
     }
@@ -78,15 +78,7 @@ export const getTablesByUserId: RequestHandler = async (req, res, next) => {
       throw new HttpRequestError("The user does not exists", 404);
     }
 
-    const populatedStudent = await student
-      .populate("table.items.tableId")
-      .execPopulate();
-
-    // const tables = populatedStudent.table.items.map(item => {
-    //     const table = item.tableId as IUserModel;
-
-    //     return table;
-    // });
+    const populatedStudent = await student.populate("table.items.tableId");
 
     return res.status(200).json({
       tables: [],
@@ -94,9 +86,6 @@ export const getTablesByUserId: RequestHandler = async (req, res, next) => {
   } catch (_err) {
     next(_err);
   }
-  // const authHeader = req.get("Authorization");
-  // const token = authHeader?.split(" ")[1];
-  // const decodedToken = jwt.decode(token!);
 };
 
 export const getTableById: RequestHandler = async (req, res, next) => {

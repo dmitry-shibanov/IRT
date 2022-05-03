@@ -1,14 +1,13 @@
 import { RequestHandler } from "express";
 import { validationResult } from "express-validator";
 import nodemailer from "nodemailer";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import HttpRequestError from "../models/HttpRequestError";
 import { randomBytes } from "crypto";
+import { sign } from "./auth/jwt-auth";
 
 import Student from "../db/Student";
 
-import Secrets from "../keys/keys.json";
 import Secretary from "../db/Secretary";
 import EmailCred from "../keys/email.json";
 
@@ -28,25 +27,35 @@ const generateRandomToken = () => {
   return token;
 };
 
+interface ISkipProperties {
+  [prop: string]: Number;
+}
+
 // добавить таблицу с информацией когда token expire.
-const iterateFromUsers = async (email: string) => {
+const iterateFromUsers = async (
+  email: string,
+  skipProperties: ISkipProperties = {}
+) => {
   const secretary = await Secretary.findOne({
     email: email,
   });
 
   if (secretary) {
-    return { user: secretary, role: "secretary", key: Secrets.secretary };
+    return { user: secretary, role: "secretary" };
   }
 
-  const student = await Student.findOne({
-    email: email,
-  });
+  const student = await Student.findOne(
+    {
+      email: email,
+    },
+    skipProperties
+  );
 
   if (!student) {
     return null;
   }
 
-  return { user: student, role: "student", key: Secrets.student };
+  return { user: student, role: "student" };
 };
 
 // nT15wwBXaggzoOOn databaseUser
@@ -73,7 +82,6 @@ export const postLogin: RequestHandler = async (req, res, next) => {
     }
 
     const userObject = await iterateFromUsers(email);
-    console.log(`userObject is ${userObject?.user.password}`);
 
     if (!userObject) {
       throw new HttpRequestError("Пользователь не найден", 404);
@@ -84,7 +92,7 @@ export const postLogin: RequestHandler = async (req, res, next) => {
 
     const passwordCompareResult = await bcrypt.compare(
       password,
-      userObject?.user.password
+      userObject.user.password
     );
 
     console.log(`compare result is ${passwordCompareResult}`);
@@ -92,19 +100,20 @@ export const postLogin: RequestHandler = async (req, res, next) => {
     if (!passwordCompareResult) {
       throw new HttpRequestError("Пароли не совпадают", 404);
     }
+    // console.log(currentUser);
+    // console.log(currentUser.id);
 
-    const token = jwt.sign(
-      {
-        email: currentUser!.email,
-        userId: currentUser!.id,
-      },
-      userObject.key,
-      { expiresIn: "10h" }
-    );
+    const token = sign({
+      email: currentUser.email,
+      userId: currentUser.id,
+      role: role,
+    });
+
+    console.log(`toke is ${token}`);
 
     res
       .status(200)
-      .json({ token: token, userId: currentUser!.id.toString(), role: role });
+      .json({ token: token, userId: currentUser.id.toString(), role: role });
   } catch (_err) {
     next(_err);
   }
@@ -134,14 +143,16 @@ export const postForgortPassword: RequestHandler = async (req, res, next) => {
     const token = generateRandomToken();
     const date = new Date(Date.now() + 3600000);
 
-    await user.update([
-      {
-        $set: {
-          resetToken: token,
-          resetDate: date,
+    await user
+      .update([
+        {
+          $set: {
+            resetToken: token,
+            resetDate: date,
+          },
         },
-      },
-    ]).exec();
+      ])
+      .exec();
 
     transporter.sendMail({
       to: email,
